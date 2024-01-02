@@ -93,14 +93,14 @@ const getPoll = async (id) => {
 
 // get polls
 
-const getPolls = async () => {
+const getAllPolls = async () => {
     try{
         if(!ethereum){
             alert('Please install MetaMask')
             return
         }
         const contract = getContract()
-        const polls = await contract.getPolls()
+        const polls = await contract.getAllPolls()
         setGlobalState('polls', structuredPolls(polls))
     } catch (error){
         console.log(error)
@@ -140,10 +140,51 @@ const createPoll = async ({title,image,description,startsAt,endsAt}) => {
         await contract.createPoll(title,image,description,startsAt,endsAt, {
             from: connectedAccount,
         })
-        await getPoll()
+        await getAllPolls()
         }  catch (error){
             console.log(error)
             reportError(error)
         }
 
+}
+
+// update poll
+
+const updatePoll = async ({id,title,image,description,startsAt,endsAt}) => 
+{
+    try{
+        if(!ethereum){
+            alert('Please install MetaMask')
+            return
+        }
+        const connectedAccount = getGlobalState('connectedAccount')
+        const contract = getContract()
+        await contract.updatePoll(id,title,image,description,startsAt,endsAt, {
+            from: connectedAccount,
+        })
+        await getAllPolls()
+        } catch (error){
+            console.log(error)
+            reportError(error)
+        }
+}
+
+// delete poll
+
+const deletePoll = async (id) => {
+    try{
+        if(!ethereum){
+            alert('Please install MetaMask')
+            return
+        }
+        const connectedAccount = getGlobalState('connectedAccount')
+        const contract = getContract()
+        await contract.deletePoll(id, {
+            from: connectedAccount,
+        })
+        await getAllPolls()
+        } catch (error){
+            console.log(error)
+            reportError(error)
+        }
 }
