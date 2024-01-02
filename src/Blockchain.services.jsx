@@ -28,6 +28,7 @@ const getContract = () => {
 
 const isWalletConnected = async () => {
     try {
+        if (!ethereum) { return alert('Please install MetaMask') }
         const accounts = await ethereum.request({ method: 'eth_accounts' })
         setGlobalState('connectedAccount', accounts[0]?.toLowerCase())
 
@@ -70,5 +71,79 @@ const connectWallet = async () => {
         reportError(error)
 
     }
+
+}
+
+// get poll
+
+const getPoll = async (id) => {
+    try{
+        if(!ethereum){
+            alert('Please install MetaMask')
+            return
+        }
+        const contract = getContract()
+        const poll = await contract.getPoll(id)
+        setGlobalState('poll', structuredPolls(poll)[0])
+    } catch (error){
+        console.log(error)
+        reportError(error)
+    }
+}
+
+// get polls
+
+const getPolls = async () => {
+    try{
+        if(!ethereum){
+            alert('Please install MetaMask')
+            return
+        }
+        const contract = getContract()
+        const polls = await contract.getPolls()
+        setGlobalState('polls', structuredPolls(polls))
+    } catch (error){
+        console.log(error)
+        reportError(error)
+    }
+}
+
+// structured polls
+
+const structuredPolls = (polls) => {
+    polls.map((poll) => ({
+        id: poll.id.toNumber(),
+        title: poll.title,
+        image: poll.image,
+        description: poll.description,
+        startsAt: poll.startsAt,
+        endsAt: poll.endsAt,
+        timestamp: new Date(poll.timestamp.toNumber()).getTime(),
+        votes: poll.totalVotes.toNumber(),
+        director: poll.director?.toLowerCase(),
+        contestants: poll.contestants.toNumber(),
+        deleted: poll.deleted
+    }))   
+}
+
+// create poll
+
+const createPoll = async ({title,image,description,startsAt,endsAt}) => {
+    try{
+        if(!ethereum){
+            alert('Please install MetaMask')
+            return
+        }
+
+        const connectedAccount = getGlobalState('connectedAccount')
+        const contract = getContract()
+        await contract.createPoll(title,image,description,startsAt,endsAt, {
+            from: connectedAccount,
+        })
+        await getPoll()
+        }  catch (error){
+            console.log(error)
+            reportError(error)
+        }
 
 }
